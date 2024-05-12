@@ -38,6 +38,9 @@ def minMax(data, curResults, priority2):
             minNum = data[x]
     var1 = maxNum - minNum
     idealNum = var1 * (priority2/100) + minNum
+    print("idealNum")
+
+    print(idealNum)
     for x in data:
         curResults[x] = (var1 - abs(idealNum - data[x]))/maxNum * 10
         if(curResults[x] < 0):
@@ -181,7 +184,7 @@ while True:
     #demographics
     print()
     print()
-    print("How important are the demographics of the metro? 0 = not important, 10 = very important. ")
+    print("How important are the racial demographics of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
@@ -201,7 +204,7 @@ while True:
             priority2 = intCheck()
 
             if(round1 == 1):
-                curResults = Counter(curResults)
+                curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
             else:
                 curResults = Counter(curResults) + Counter(minMax(data[race[priority1]], curResults, priority2))
             
@@ -225,13 +228,7 @@ while True:
 
     if (weight != 0):
         print("How diverse is your ideal metro?")
-        print("(90-100 = no group has clear majority")
-        print("75-90 = one group (likely) has a slim majority")
-        print("50-75 = the vast majority is one group")
-        print("0-50 = little to no diversity")        
-        
-        print("How diverse is your ideal metro?")
-        print("(66-75 = no group has clear majority (80-100)")
+        print("66-75 = no group has clear majority (80-100)")
         print("55-66 = one group (likely) has a slim majority (66-80)")
         print("40-55 = the vast majority is one group (50-66)")
         print("10-40 = little to no diversity (0-50)")
@@ -240,7 +237,121 @@ while True:
         diverse = intCheck()/100   #adjust down to the scale of data if choose 0-100 scale: *.007445
         results = addToReport(growth(data["diversityPerc"], curResults, diverse, .2), results, weight)
         totalWeight += weight
-        print(curResults)
+
+
+    # similar age
+    print()
+    print()
+    print("How important is it for the city to have a lot/ less people of a certain age group?")
+    print("0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print() 
+
+    if (weight != 0):
+        round = 1
+
+        while True:
+            print("Is there a specific age brackets you would like to prioritize/ deprioritize?")
+            print("Ages 0-18 = 1, Ages 18-24 = 2, Ages 25-44 = 3, Ages 45-64 = 4, Ages 65 and up = 5")
+            priority1 = intCheck()
+            age = {1:"0to18", 2:"18to24", 3:"25to44", 4:"45to64", 5:"65plus"}
+            
+            print("How much of this group should be in this metro?")
+            print("100 = as many as possible, 0 = as little as possible")
+            priority2 = intCheck()
+
+            if(round == 1):
+                curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
+                round += 1
+            else:
+                curResults = Counter(curResults) + Counter(minMax(data[age[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other age brackets? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
+    # median age
+    print()
+    print()
+    print("How important is the overall median age of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("How young or old should it be overall?")
+        print("0 = as young as possible, 100 = as old as possible")
+
+        print("Your preference: ")
+        diverse = (intCheck()-25.3) * 3.55872
+        results = addToReport(growth(data["medianAge"], curResults, diverse, 15), results, weight)
+        totalWeight += weight
+
+
+    # education level
+    print()
+    print()
+    print("How important is the education level of people in the metro?")
+    print("0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print() 
+
+    if (weight != 0):
+        round = 1
+
+        while True:
+            print("Which education level would you like to prioritize/ deprioritize?")
+            print("Less than high school = 1, High school = 2, Some college = 3, Bachelors and up = 4")
+            priority1 = intCheck()
+            age = {1:"lessHighSchoolPerc", 2:"highSchoolPerc", 3:"someCollegePerc", 4:"bachelorPlusPerc"}
+            
+            print("How much of this group should be in this metro?")
+            print("100 = as many as possible, 0 = as little as possible")
+            priority2 = intCheck()
+
+            if(round == 1):
+                curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
+                round += 1
+            else:
+                curResults = Counter(curResults) + Counter(minMax(data[age[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other age brackets? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
+    # median age
+    print()
+    print()
+    print("How important is the overall education level of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("How important is education levels of the metro?")
+        print("0 = education isn't important, 100 = education is important")
+
+        print("Your preference: ")
+        diverse = (intCheck()/89
+        results = addToReport(growth(data["educationLevel"], curResults, diverse, 15), results, weight)
+        totalWeight += weight
+
+
+
+
+
+
+
 
 
 

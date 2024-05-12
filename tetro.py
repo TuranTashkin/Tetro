@@ -38,7 +38,6 @@ def minMax(data, curResults, priority2):
             minNum = data[x]
     var1 = maxNum - minNum
     idealNum = var1 * (priority2/100) + minNum
-    print(maxNum)
     for x in data:
         curResults[x] = (var1 - abs(idealNum - data[x]))/maxNum * 10
         if(curResults[x] < 0):
@@ -55,11 +54,15 @@ def addToReport(curResults, results, weight):
 
 #asks for an int input, keeps trying until it finds
 def intCheck():
+
     while True:
+        var = input("Enter a number here: ")              
         try:
-            var = int(input("Enter a number here: "))
+            var = int(var)
             return(var)
         except ValueError:
+            if(var == 'x' or var == 'X'):
+                exit()
             print("Please enter numbers only.")
 
 
@@ -77,6 +80,7 @@ def intCheck():
 print()
 print()
 print('Welcome to Tetro!')
+print("Enter x at anytime to quit.")
 
 weight = int()
 totalWeight = 0
@@ -105,8 +109,10 @@ while True:
 
     #ideal size of metro
     print()
+    print()
     print("How important is the size of the metro? 0 = not important, 10 = very important.")
     weight = intCheck()
+    print()
 
     if(weight != 0):
         
@@ -125,16 +131,15 @@ while True:
         size2 = m.log10(size2)        
 
         results = addToReport(pop(data["popLog"], curResults, size0, size1, size2), results, weight)
-        totalWeight += (weight*10)
-        print()
-        print(curResults)
-        print(results)
+        totalWeight += weight
 
 
     #growth rate
     print()
+    print()
     print("How important is the growth rate of the city important to you? 0 = not important, 10 = very important. ")
     weight = intCheck()
+    print()
 
     if (weight != 0):
         print("Enter your ideal metro growth rate (2010 to 2020 growth in parathesis)")
@@ -147,17 +152,15 @@ while True:
         print("Your preference: ")
         grow = intCheck()/100
         results = addToReport(growth(data["decadeGrowth"], curResults, grow, .1), results, weight)
-        totalWeight += (weight*10)
-        print()
-        print(curResults)
-        print(results)
-
+        totalWeight += weight
 
 
     #politics of the city
     print()
+    print()
     print("How important are the politics of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
+    print()
 
     if (weight != 0):
         print("Enter your ideal political leaning (2020 presidential election margins in parathesis)")
@@ -172,20 +175,19 @@ while True:
         print("Your preference: ")
         politics = intCheck()/100
         results = addToReport(growth(data["margin"], curResults, politics, .3), results, weight)
-        totalWeight += (weight*10)
-        print()
-        print(curResults)
-        print(results)
+        totalWeight += weight
+
 
     #demographics
     print()
+    print()
     print("How important are the demographics of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
+    print()
 
     if (weight != 0):
         round1 = 0
-        x = True
-        while x == True:
+        while True:
             round1 += 1
             print("Is there a specific community you would like to prioritize/ deprioritize?")
             print("White = 1, Latino = 2, Black = 3, Asian = 4, Native American = 5")
@@ -194,31 +196,58 @@ while True:
             race = {1:"whiteAlone", 2:"latino", 3:"blackAlone", 4:"asianAlone", 
                     5:"nativeAlone", 6:"pacificAlone", 7:"otherAlone", 8:"twoPlus"}
             
-            print("To what extent do you want this group?")
+            print("What percentage of the metro should this group be?")
             print("100 = as many as possible, 0 = as little as possible")
             priority2 = intCheck()
 
-
-            cont = int(input("Do you want to adjust any other groups? 1 = yes, 0 = no. "))
-            if(cont == 0):
-                x = False
+            if(round1 == 1):
+                curResults = Counter(curResults)
             else:
                 curResults = Counter(curResults) + Counter(minMax(data[race[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other groups? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
         
-        # combines all curResults and divides curResults by the number of rounds
-        curResults = Counter(curResults) + Counter(minMax(data[race[priority1]], curResults, priority2))
+        # divides curResults by the number of rounds
         curResults = Counter({key : curResults[key] / round1 for key in curResults})
         
         results = addToReport(curResults, results, weight)
-        totalWeight += (weight*10)
-        print()
+        totalWeight += weight
+
+
+    # diversity
+    print()
+    print()
+    print("How important is the level of diversity of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("How diverse is your ideal metro?")
+        print("(90-100 = no group has clear majority")
+        print("75-90 = one group (likely) has a slim majority")
+        print("50-75 = the vast majority is one group")
+        print("0-50 = little to no diversity")        
+        
+        print("How diverse is your ideal metro?")
+        print("(66-75 = no group has clear majority (80-100)")
+        print("55-66 = one group (likely) has a slim majority (66-80)")
+        print("40-55 = the vast majority is one group (50-66)")
+        print("10-40 = little to no diversity (0-50)")
+
+        print("Your preference: ")
+        diverse = intCheck()/100   #adjust down to the scale of data if choose 0-100 scale: *.007445
+        results = addToReport(growth(data["diversityPerc"], curResults, diverse, .2), results, weight)
+        totalWeight += weight
         print(curResults)
-        print(results)
+
 
 
 
     # results: declare the best metros for the user
     results = Counter({key : results[key] / totalWeight for key in results})
+    print()
     print(results)
     print(totalWeight)
     break

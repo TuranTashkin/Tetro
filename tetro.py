@@ -12,10 +12,12 @@ from collections import Counter
 #commit: commits each answer to the report
 
 #population preferences: adjust report to according to how big they want their metro to be
-def pop(data, curResults, size0, size1, size2):
+def pop(data, curResults, size0, size1, size2, var1):
     for x in data:
         if(data[x] < size1 and data[x] > size2):
-            curResults[x] = 10 - abs(size0 - data[x]) * 5.88  #5.88 because popLog range is 5.6 to 7.3, difference = 1.7, 10/1.7 = 5.88 because the difference needs to be adjusted to 10
+            curResults[x] = 10 - abs(size0 - data[x]) * var1 
+        elif(data[x] == 0):
+            curResults[x] = 5
         else:
             curResults[x] = 0
     return(curResults)
@@ -26,6 +28,17 @@ def growth(data, curResults, grow, var1): # grow = ideal, var1 is how much from 
         curResults[x] = (10/var1) * (var1 - abs(grow - data[x]))
         if(curResults[x] < 0):
             curResults[x] = 0
+    return(curResults)
+
+#includes indifference 
+def risky(data, curResults, risk, var1): # grow = ideal, var1 is how much from each side of grow should be considered
+    for x in data:                       # weeds out number that should be indifferent to
+        if(data[x] < risk):
+            curResults[x] = 10
+        else:
+            curResults[x] = (10/var1) * (var1 - abs(risk - data[x]))
+            if(curResults[x] < 0):
+                curResults[x] = 0
     return(curResults)
 
 def minMax(data, curResults, priority2):
@@ -93,8 +106,8 @@ totalWeight = 0
 
 # report: create new report, where everything will be saved
 
-data1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="metroData", index_col='ID')
-report1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="report", index_col='ID')
+data1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="metroData", index_col='metro')
+report1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="report", index_col='metro')
 
 data = data1.to_dict()
 report = report1.to_dict()
@@ -106,6 +119,8 @@ curResults = report["curResults"]
 # questions: where questions will be asked and functions called
 
 while True:
+
+    print("DEMOGRAPHICS")
 
     #ideal size of metro
     print()
@@ -130,11 +145,11 @@ while True:
             size2 = 475000
         size2 = m.log10(size2)        
 
-        results = addToReport(pop(data["popLog"], curResults, size0, size1, size2), results, weight)
+        results = addToReport(pop(data["popLog"], curResults, size0, size1, size2, 5.88), results, weight) #5.88 because popLog range is 5.6 to 7.3, difference = 1.7, 10/1.7 = 5.88 because the difference needs to be adjusted to 10
         totalWeight += weight
 
 
-    #growth rate
+    #population growth rate
     print()
     print()
     print("How important is the growth rate of the city important to you? 0 = not important, 10 = very important. ")
@@ -155,30 +170,27 @@ while True:
         totalWeight += weight
 
 
-    #politics of the city
+    # diversity
     print()
     print()
-    print("How important are the politics of the metro? 0 = not important, 10 = very important. ")
+    print("How important is the level of diversity of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
     if (weight != 0):
-        print("Enter your ideal political leaning (2020 presidential election margins in parathesis)")
-        print("(-60% to -30%) As liberal as possible")
-        print("(-30% to -15%) Very liberal")
-        print("(-15% to -8%) Moderately liberal")
-        print("(-8% to 8%) Mixed politics")
-        print("(8% to 15%) Moderately conservative")
-        print("(15% to 30%) Very conservative")
-        print("(30% to 45%) As conservative as possible")
+        print("How diverse is your ideal metro?")
+        print("66-75 = no group has clear majority (80-100)")
+        print("55-66 = one group (likely) has a slim majority (66-80)")
+        print("40-55 = the vast majority is one group (50-66)")
+        print("10-40 = little to no diversity (0-50)")
 
         print("Your preference: ")
-        politics = intCheck()/100
-        results = addToReport(growth(data["margin"], curResults, politics, .3), results, weight)
+        diverse = intCheck()/100   #adjust down to the scale of data if choose 0-100 scale: *.007445
+        results = addToReport(growth(data["diversityPerc"], curResults, diverse, .2), results, weight)
         totalWeight += weight
 
 
-    #demographics
+    #racial demographics
     print()
     print()
     print("How important are the racial demographics of the metro? 0 = not important, 10 = very important. ")
@@ -201,7 +213,7 @@ while True:
             priority2 = intCheck()
 
             if(round1 == 1):
-                curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
+                curResults = Counter(minMax(data[race[priority1]], curResults, priority2))
             else:
                 curResults = Counter(curResults) + Counter(minMax(data[race[priority1]], curResults, priority2))
             
@@ -216,23 +228,20 @@ while True:
         totalWeight += weight
 
 
-    # diversity
+    # median age
     print()
     print()
-    print("How important is the level of diversity of the metro? 0 = not important, 10 = very important. ")
+    print("How important is the overall median age of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
     if (weight != 0):
-        print("How diverse is your ideal metro?")
-        print("66-75 = no group has clear majority (80-100)")
-        print("55-66 = one group (likely) has a slim majority (66-80)")
-        print("40-55 = the vast majority is one group (50-66)")
-        print("10-40 = little to no diversity (0-50)")
+        print("How young or old should it be overall?")
+        print("0 = as young as possible, 100 = as old as possible")
 
         print("Your preference: ")
-        diverse = intCheck()/100   #adjust down to the scale of data if choose 0-100 scale: *.007445
-        results = addToReport(growth(data["diversityPerc"], curResults, diverse, .2), results, weight)
+        diverse = (intCheck()-25.3) * 3.55872
+        results = addToReport(growth(data["medianAge"], curResults, diverse, 15), results, weight)
         totalWeight += weight
 
 
@@ -273,20 +282,21 @@ while True:
         totalWeight += weight
 
 
-    # median age
+    # education level
     print()
     print()
-    print("How important is the overall median age of the metro? 0 = not important, 10 = very important. ")
+    print("How important is the overall education level of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
+    # may be able to get rid of these prints and just have weight equal diverse
     if (weight != 0):
-        print("How young or old should it be overall?")
-        print("0 = as young as possible, 100 = as old as possible")
+        print("How important is education levels of the metro?")
+        print("0 = education isn't important, 100 = education is important")
 
         print("Your preference: ")
-        diverse = (intCheck()-25.3) * 3.55872
-        results = addToReport(growth(data["medianAge"], curResults, diverse, 15), results, weight)
+        diverse = (intCheck()/112.3595506)+2.29   #adjusts 0-100 into 2.29-3.18
+        results = addToReport(growth(data["educationLevel"], curResults, diverse, .35), results, weight)
         totalWeight += weight
 
 
@@ -327,52 +337,48 @@ while True:
         totalWeight += weight
 
 
-    # education level
+    #religiosity
     print()
     print()
-    print("How important is the overall education level of the metro? 0 = not important, 10 = very important. ")
+    print("How important is the religiosity of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
-    # may be able to get rid of these prints and just have weight equal diverse
-    if (weight != 0):
-        print("How important is education levels of the metro?")
-        print("0 = education isn't important, 100 = education is important")
+    if(weight != 0):
+        print("Do you prefer less religious or more religious metros?")
+        print("0 = as irreligious as possible, 100 = as religious as possible")
 
         print("Your preference: ")
-        diverse = (intCheck()/112.3595506)+2.29   #adjusts 0-100 into 2.29-3.18
-        results = addToReport(growth(data["educationLevel"], curResults, diverse, .35), results, weight)
+
+        religious = (intCheck()/1.768745)+32.1657   #adjusts 0-100 into 32.1657-88.70297
+        results = addToReport(growth(data["religiousIndivPerc"], curResults, religious, .28), results, weight)
         totalWeight += weight
 
 
-    # green transport
+    #politics of the city
     print()
     print()
-    print("How important is the availability of green transportation (public transporation, walking, biking)?")
-    print("0 = not important, 10 = very important. ")
-    weight = intCheck() * 10
-    print()
-
-    if (weight != 0):
-        green = (weight/2.84091)+1   #adjusts 0-100 into 1-36.2
-        results = addToReport(growth(data["greenTransport"], curResults, green, 25), results, weight)
-        totalWeight += weight
-
-
-    # travel time
-    print()
-    print()
-    print("How important is travel time to work? 0 = not important, 10 = very important. ")
+    print("How important are the politics of the metro? 0 = not important, 10 = very important. ")
     weight = intCheck()
     print()
 
     if (weight != 0):
-        print("How important are short travel times to work for you? 0 = not important, 100 = very important")
+        print("Enter your ideal political leaning (2020 presidential election margins in parathesis)")
+        print("(-60% to -30%) As liberal as possible")
+        print("(-30% to -15%) Very liberal")
+        print("(-15% to -8%) Moderately liberal")
+        print("(-8% to 8%) Mixed politics")
+        print("(8% to 15%) Moderately conservative")
+        print("(15% to 30%) Very conservative")
+        print("(30% to 45%) As conservative as possible")
+
         print("Your preference: ")
-        travel = (abs(100-intCheck())/1.39082)+20.2   #adjusts 0-100 into 20.2-92.1
-        results = addToReport(growth(data["travelTimeMins"], curResults, travel, 25), results, weight)
+        politics = intCheck()/100
+        results = addToReport(growth(data["margin"], curResults, politics, .3), results, weight)
         totalWeight += weight
 
+
+    print("ECONOMY AND TRANSPORTATION")
 
     # types of transport
     print()
@@ -404,11 +410,39 @@ while True:
             cont = int(input("Do you want to adjust any other transportation methods? 1 = yes, 0 = no. "))
             if(cont == 0):
                 break
-        print(curResults)
 
         # divides curResults by the number of rounds
         curResults = Counter({key : curResults[key] / round for key in curResults})
         results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
+    # # green transport
+    # print()
+    # print()
+    # print("How important is the availability of green transportation (public transporation, walking, biking)?")
+    # print("0 = not important, 10 = very important. ")
+    # weight = intCheck() * 10
+    # print()
+
+    # if (weight != 0):
+    #     green = (weight/2.84091)+1   #adjusts 0-100 into 1-36.2
+    #     results = addToReport(growth(data["greenTransport"], curResults, green, 25), results, weight)
+    #     totalWeight += weight
+
+
+    # travel time
+    print()
+    print()
+    print("How important is travel time to work? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("How important are short travel times to work for you? 0 = not important, 100 = very important")
+        print("Your preference: ")
+        travel = (abs(100-intCheck())/1.39082)+20.2   #adjusts 0-100 into 20.2-92.1
+        results = addToReport(growth(data["travelTimeMins"], curResults, travel, 25), results, weight)
         totalWeight += weight
 
 
@@ -420,17 +454,311 @@ while True:
     print()
 
     if (weight != 0):
-        travel = (abs(100-weight())/11.111111)+3.5   #adjusts 0-100 into 3.5-12.5
+        travel = (weight()/11.111111)+3.5   #adjusts 0-100 into 3.5-12.5
         results = addToReport(growth(data["workFromHome"], curResults, travel, 3.5), results, weight)
         totalWeight += weight
 
 
+    #per capital personal income
+    print()
+    print()
+    print("How important is the level of wealth of people in the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("Do you prefer to live in a poorer or richer area?")
+        print("0 = as poor as possible, 100 = as rich as possible")
+
+        print("Your preference: ")
+
+        income = (intCheck()/0.00110539)+31153   #adjusts 0-100 into 31153-121619
+        results = addToReport(growth(data["perCapitaPersonalIncome"], curResults, income, 50000), results, weight)
+        totalWeight += weight
+
+
+    # regional price parity
+    print()
+    print()
+    print("How important are the price levels of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("Does it matter if the metro is expensive?")
+        print("0 = yes- I prefer cheaper metros, 100 = no- I'm happy with expensive metros")
+
+        print("Your preference: ")
+
+        price = (intCheck()/4.2312)+88.488   #adjusts 0-100 into 88.488-112.122
+        results = addToReport(growth(data["regionalPriceParity"], curResults, price, 12), results, weight)
+        totalWeight += weight
+
+
+    #housing costs
+    print()
+    print()
+    print("How important is the cost of housing in a metro?, 10 = very important.")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        
+        print("What is your ideal average cost of a metro?")
+        print("Largest is 1577K, smallest 135K. Measured in single family housing.)")        
+        print("Please enter your ideal average cost.")
+        size0 = m.log10(intCheck()/1000)
+        print("Please enter the highest acceptable range. If no upper limit, enter 1.")
+        size1 = intCheck()/1000
+        if size1 == 1:
+            size1 = 1576
+        print("Please enter the lowest acceptable range. If no lower limit, enter 0.")
+        size2 = intCheck()/1000
+        if size2 == 0:
+            size2 = 135
+
+        results = addToReport(pop(data["housingCost2022q4"], curResults, size0, size1, size2, 0.006935), results, weight)
+        totalWeight += weight
+
+
+    # housing types
+    print()
+    print()
+    print("How important is the availability of different types of housing options?")
+    print("0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print() 
+
+    if (weight != 0):
+        round = 1
+
+        while True:
+            print("What type of housing would you like to prioritize/ deprioritize?")
+            print("Single family detached = 1, Single family attached = 2, Duplex = 3")
+            print("3 to 4 units = 4, 5 to 9 units = 5, 10 or more units = 6, Mobile housing and others = 7")
+
+            priority1 = intCheck()
+            houses = {1:"SFDetachedPerc", 2:"SFAttachedPerc", 3:"2apartments", 4:"3to4apartments", 5:"5to9apartments",
+                         6:"10plusApartments", 7: "mobileAndOtherHomes"}
+            
+            print("How much should you priorize/ deprioritize this housing option in metros?")
+            print("0 = as little as possible, 100 = as much as possible")
+            priority2 = intCheck()
+
+            if(round == 1):
+                curResults = Counter(minMax(data[houses[priority1]], curResults, priority2))
+                round += 1
+            else:
+                curResults = Counter(curResults) + Counter(minMax(data[houses[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other housing options? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
+    #housing age
+    print()
+    print()
+    print("How important is the average age of the housing stock?, 10 = very important.")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("What is your ideal age of housing in a metro?")
+        print("0 = as young as possible, 100 = as old as possible")
+
+        print("Your preference: ")
+
+        nat = (intCheck()*0.374)+38
+        results = addToReport(risky(data["approxAvgAgeHousing"], curResults, nat, 20), results, weight)
+        totalWeight += weight
+
+
+    #owner occupied
+    print()
+    print()
+    print("How important is the amount of units owner occupied in the metro (also effects how many rentals available)?")
+    print("0 = not important, 10 = very important.")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("How much of the metro should be owner occupied units?")
+        print("0 = as little as possible, 100 = as much as possible")
+
+        print("Your preference: ")
+
+        owner = (intCheck()/100*.28)+.49
+        results = addToReport(risky(data["ownerOccupiedPerc"], curResults, owner, 14), results, weight)
+        totalWeight += weight
+
+    
+    print("GEOGRAPHY")
+
+    # temperature
+    print()
+    print()
+    print("How important is the temperature of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("Do you prefer colder or warmer weather?")
+        print("0 = coldest possible, 100 = hottest possible")
+
+        print("Your preference: ")
+
+        temp = (intCheck()/3.215434)+46.9   #adjusts 0-100 into 46.9-78
+        results = addToReport(growth(data["avgTemp"], curResults, temp, 15), results, weight)
+        totalWeight += weight
+
+
+    #precipitation
+    print()
+    print()
+    print("How important is the rain/ precipitation levels of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("Do you prefer little rain or rainier metros?")
+        print("0 = as little rain as possible, 100 = as much rain as possible")
+
+        print("Your preference: ")
+
+        temp = (intCheck()/1.570845)+4.18   #adjusts 0-100 into 4.18-67.84
+        results = addToReport(growth(data["precipInches"], curResults, temp, 30), results, weight)
+        totalWeight += weight
+
+
+    #snow
+    print()
+    print()
+    print("How important is the snow levels of the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("Do you prefer little snow or snowier metros?")
+        print("0 = as little snow as possible, 100 = as much snow as possible")
+
+        print("Your preference: ")
+
+        temp = (intCheck()/0.78247)   #adjusts 0-100 into 0-127.8
+        results = addToReport(growth(data["snowInches"], curResults, temp, 50), results, weight)
+        totalWeight += weight
+
+
+    # overall disaster
+    print()
+    print()
+    print("How important is the level of natural disasters in metros? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if(weight != 0):
+        print("How much risk of natural disasters do you prefer?")
+        print("0 = as little risk as possible, 100 = indifferent to the risk")
+
+        print("Your preference: ")
+
+        nat = intCheck()
+        results = addToReport(risky(data["disasterRiskIndex"], curResults, nat, 50), results, weight)
+        totalWeight += weight
+
+
+    # specific disasters
+    print()
+    print()
+    print("How important is the potential of specific natural disasters?")
+    print("0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print() 
+
+    if (weight != 0):
+        round = 1
+
+        while True:
+            print("Do you have any natural disaster you are particularly fearful of?")
+            print("Avalanche = 1, Coastal flooding = 2, Cold Wave = 3, Drought = 4, Earthquake = 5")
+            print("Hail = 6, Heatwave = 7, Hurricane = 8, Ice storm = 9, Landslide = 10")
+            print("Lightning = 11, River flooding = 12, Strong winds = 13, Tornado = 14")
+            print("Tsunami = 15, Volcano = 16, Wildfire = 17, Winter Weather = 18")
+
+            priority1 = intCheck()
+            nature = {1:"avalanche", 2:"coastalFlooding", 3:"coldWave", 4:"drought", 5:"earthquake",
+                         6:"hail", 7: "heatWave", 8:"hurricane", 9:"iceStorm", 10:"landSlide",
+                         11:"lightning", 12:"riverFlooding", 13:"strongWinds", 14:"tornado",
+                         15:"tsunami", 16:"volcano", 17:"wildfire", 18:"winterWeather"}
+            
+            print("How much should you priorize this natural disaster in metros?")
+            print("0 = high risk, 100 = low risk")
+            priority2 = abs(100-intCheck())
+
+            if(round == 1):
+                curResults = Counter(minMax(data[nature[priority1]], curResults, priority2))
+                round += 1
+            else:
+                curResults = Counter(curResults) + Counter(minMax(data[nature[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other transportation methods? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
+    print("CULTURAL")
+
+#sports
+    print()
+    print()
+    print("How important is it for the metro to have sports teams?")
+    print("0 = not important, 10 = very important.")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        round = 0
+        curResults1 = curResults
+        while True:
+            print("Which sports do you care about?")
+            print("All = 1, Baseball = 2, Football = 3, Basketball = 4, Hockey = 5, Soccer = 6")
+
+            priority1 = intCheck()
+            houses = {1:"sportsTeams", 2:"MLBteams", 3:"NFLteams", 4:"NBAteams", 5:"NHLteams", 6:"MLSteams"}
+            			
+            for x in data:
+                if(data[x] != 0):
+                    curResults1[x] = 10
+                else:
+                    curResults1[x] = 0
+
+            if(round != 0):
+                curResults = Counter(curResults) + Counter(curResults1)
+            round += 1
+
+            cont = int(input("Do you want to adjust any other sports? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
 
 
 
-
-
-
+#RESULTS
+    print("RESULTS")
 
     # results: declare the best metros for the user
     results = Counter({key : results[key] / totalWeight for key in results})

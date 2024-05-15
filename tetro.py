@@ -96,8 +96,8 @@ totalWeight = 0
 
 # report: create new report, where everything will be saved
 
-data1 = pd.read_excel(io="C:\\Users\\turan\\OneDrive\\Documents\\metroData.xlsx", sheet_name="metroData", index_col='ID')
-report1 = pd.read_excel(io="C:\\Users\\turan\\OneDrive\\Documents\\metroData.xlsx", sheet_name="report", index_col='ID')
+data1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="metroData", index_col='ID')
+report1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="report", index_col='ID')
 
 data = data1.to_dict()
 report = report1.to_dict()
@@ -353,16 +353,30 @@ while True:
     print()
     print("How important is the availability of green transportation (public transporation, walking, biking)?")
     print("0 = not important, 10 = very important. ")
-    weight = intCheck()
+    weight = intCheck() * 10
     print()
 
     if (weight != 0):
-        diverse = (weight/2.84091)+35.2   #adjusts 0-100 into 1-36.2
-        results = addToReport(growth(data["greenTransport"], curResults, diverse, 30), results, weight)
+        green = (weight/2.84091)+1   #adjusts 0-100 into 1-36.2
+        results = addToReport(growth(data["greenTransport"], curResults, green, 25), results, weight)
         totalWeight += weight
 
 
     # travel time
+    print()
+    print()
+    print("How important is travel time to work? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        print("How important are short travel times to work for you? 0 = not important, 100 = very important")
+        print("Your preference: ")
+        travel = (abs(100-intCheck())/1.39082)+20.2   #adjusts 0-100 into 20.2-92.1
+        results = addToReport(growth(data["travelTimeMins"], curResults, travel, 25), results, weight)
+        totalWeight += weight
+
+
     # types of transport
     # work from home
 

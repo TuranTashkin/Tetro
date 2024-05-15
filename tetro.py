@@ -38,9 +38,6 @@ def minMax(data, curResults, priority2):
             minNum = data[x]
     var1 = maxNum - minNum
     idealNum = var1 * (priority2/100) + minNum
-    print("idealNum")
-
-    print(idealNum)
     for x in data:
         curResults[x] = (var1 - abs(idealNum - data[x]))/maxNum * 10
         if(curResults[x] < 0):
@@ -378,7 +375,54 @@ while True:
 
 
     # types of transport
+    print()
+    print()
+    print("How important is the availability of specific transportation methods?")
+    print("0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print() 
+
+    if (weight != 0):
+        round = 1
+
+        while True:
+            print("Which transportation method would you like to prioritize/ deprioritize?")
+            print("Vehicles = 1, Public transportation = 2, Walking = 3, Biking = 4")
+            priority1 = intCheck()
+            transport = {1:"vehicle", 2:"publicTransport", 3:"walking", 4:"biking"}
+            
+            print("How much should you priorize this method of transportation in metros?")
+            print("100 = as many as possible, 0 = as little as possible")
+            priority2 = intCheck()
+
+            if(round == 1):
+                curResults = Counter(minMax(data[transport[priority1]], curResults, priority2))
+                round += 1
+            else:
+                curResults = Counter(curResults) + Counter(minMax(data[transport[priority1]], curResults, priority2))
+            
+            cont = int(input("Do you want to adjust any other transportation methods? 1 = yes, 0 = no. "))
+            if(cont == 0):
+                break
+        print(curResults)
+
+        # divides curResults by the number of rounds
+        curResults = Counter({key : curResults[key] / round for key in curResults})
+        results = addToReport(curResults, results, weight)
+        totalWeight += weight
+
+
     # work from home
+    print()
+    print()
+    print("How important is the level of work from home in the metro? 0 = not important, 10 = very important. ")
+    weight = intCheck()
+    print()
+
+    if (weight != 0):
+        travel = (abs(100-weight())/11.111111)+3.5   #adjusts 0-100 into 3.5-12.5
+        results = addToReport(growth(data["workFromHome"], curResults, travel, 3.5), results, weight)
+        totalWeight += weight
 
 
 

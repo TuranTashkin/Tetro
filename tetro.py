@@ -41,7 +41,7 @@ def risky(data, curResults, risk, var1): # grow = ideal, var1 is how much from e
                 curResults[x] = 0
     return(curResults)
 
-# 
+# uses the min and max in giving out points
 def minMax(data, curResults, priority2):
     maxNum = 0
     minNum = 100
@@ -65,6 +65,20 @@ def addToReport(curResults, results, weight):
             results[x] = (curResults[x] * weight) + results[x]
     return(results)
 
+#asks for an int input between 0 and 10, keeps trying until it finds
+def intCheckTen():
+
+    while True:
+        var = input("Enter a number here between 0 and 10: ")              
+        try:
+            var = int(var)
+            if(var >= 0 and var <= 10):
+                return(var)
+        except ValueError:
+            if(var == 'x' or var == 'X'):
+                exit()
+            print("Please enter numbers only.")
+
 #asks for an int input, keeps trying until it finds
 def intCheck():
 
@@ -79,8 +93,8 @@ def intCheck():
             print("Please enter numbers only.")
 
 
-#topic: Functions for each topic
 
+#topic: Functions for each topic
 
 
 
@@ -94,6 +108,7 @@ print()
 print()
 print('Welcome to Tetro!')
 print("Enter x at anytime to quit.")
+print()
 
 weight = int()
 totalWeight = 0
@@ -124,20 +139,20 @@ cultResults = report["base5"]
 
 while True:
 
-    print("Please weight, on a scale of 0 to 10 of how important these aspects of metros are:")
-    print("0 = not important, 10 = very important")
+    print("Please determine, on a scale of 0 to 10,how important these aspects of metros are:")
     print("Demographics, economy, home and transport, climate, and culture")
+    print("0 = not important, 10 = very important")
     print()
-    print("Demographics of the metro (age, racial, religiosity, education, politics): ")
-    demoWeight = intCheck()
-    print("Economy and worklife of the metro (income, prices, worklife): ")
-    econWeight = intCheck()
+    print("Demographics of the metro (age, racial, religiosity, education, politics):")
+    demoWeight = intCheckTen()
+    print("Economy and worklife of the metro (income, prices, worklife):")
+    econWeight = intCheckTen()
     print("Home and transportation of the metro (home costs, home and transportation types): ")
-    homeWeight = intCheck()
+    homeWeight = intCheckTen()
     print("Climate of the metro (weather, sunshine, natural disasters): ")
-    climWeight = intCheck()
+    climWeight = intCheckTen()
     print("Culture of the metro(sports): ")
-    cultWeight = intCheck()
+    cultWeight = intCheckTen()
 
     sectionWeight = demoWeight + econWeight + homeWeight + climWeight + cultWeight
 
@@ -145,13 +160,14 @@ while True:
 
     if(demoWeight != 0):
         print()
-        print("DEMOGRAPHICS")
+        print("DEMOGRAPHICS OF THE METRO")
 
         #ideal size of metro
         print()
         print()
-        print("How important is the size of the metro? 0 = not important, 10 = very important.")
-        weight = intCheck()
+        print("How important is the size of the metro (population)?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -176,8 +192,9 @@ while True:
         #population growth rate
         print()
         print()
-        print("How important is the growth rate of the city important to you? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the growth rate of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -193,25 +210,13 @@ while True:
             demoResults = addToReport(growth(data["decadeGrowth"], curResults, grow, .1), demoResults, weight)
             totalWeight += weight
 
-        print(demoWeight)
-        print(demoResults)
-        print(econWeight)
-        print(econResults)
-        print(homeWeight)
-        print(homeResults)
-        print(climWeight)
-        print(climResults)
-        print(cultWeight)
-        print(cultResults)
-        print(sectionWeight)
-
-
 
         # diversity
         print()
         print()
-        print("How important is the level of diversity of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the level of racial diversity of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -230,8 +235,9 @@ while True:
         #racial demographics
         print()
         print()
-        print("How important are the racial demographics of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the racial demographics of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -268,8 +274,9 @@ while True:
         # age
         print()
         print()
-        print("How important is the overall age demographics of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the age demographics of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -318,8 +325,9 @@ while True:
         # education level
         print()
         print()
-        print("How important is the overall education level of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the overall education level of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -369,8 +377,9 @@ while True:
         #religiosity
         print()
         print()
-        print("How important is the religiosity of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the religiosity of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -387,8 +396,9 @@ while True:
         #politics of the city
         print()
         print()
-        print("How important are the politics of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the politics of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -413,13 +423,14 @@ while True:
 
     if(econWeight != 0):
         print()
-        print("ECONOMY AND WORK")
+        print("ECONOMY AND WORKLIFE OF THE METRO")
 
         # travel time
         print()
         print()
-        print("How important is travel time to work? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the average travel time to work in the metro (relates to traffic levels)?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -433,8 +444,9 @@ while True:
         # work from home
         print()
         print()
-        print("How important is the level of work from home in the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the popularity of work from home in the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -446,8 +458,9 @@ while True:
         #per capital personal income
         print()
         print()
-        print("How important is the level of wealth of people in the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the level of wealth of people in the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -464,8 +477,9 @@ while True:
         # regional price parity
         print()
         print()
-        print("How important are the price levels of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the price levels of goods and services in the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if (weight != 0):
@@ -485,14 +499,14 @@ while True:
 
     if(homeWeight != 0):
         print()
-        print("HOME AND TRANSPORTATION")
+        print("HOME AND TRANSPORTATION IN THE METRO")
 
         # types of transport
         print()
         print()
-        print("How important is the availability of specific transportation methods?")
+        print("How important is the availability of specific transportation methods in the metro?")
         print("0 = not important, 10 = very important. ")
-        weight = intCheck()
+        weight = intCheckTen()
         print() 
 
         if (weight != 0):
@@ -526,8 +540,10 @@ while True:
         #housing costs
         print()
         print()
-        print("How important is the cost of housing in a metro?, 10 = very important.")
-        weight = intCheck()
+        print("How important is the cost of housing in a metro (measured in single family housing)?")
+        print("0 = not important, 10 = very important.")
+
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -553,8 +569,9 @@ while True:
         print()
         print()
         print("How important is the availability of different types of housing options?")
-        print("0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("(Example: availability of single family housing, duplex, apartments, etc.)")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print() 
 
         if (weight != 0):
@@ -592,8 +609,9 @@ while True:
         #housing age
         print()
         print()
-        print("How important is the average age of the housing stock?, 10 = very important.")
-        weight = intCheck()
+        print("How important is the age of the housing stock?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -610,9 +628,9 @@ while True:
         #owner occupied
         print()
         print()
-        print("How important is the amount of units owner occupied in the metro (also effects how many rentals available)?")
+        print("How important is the amount of owner occupied units in the metro (also reflects how many rentals are available)?")
         print("0 = not important, 10 = very important.")
-        weight = intCheck()
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -632,13 +650,14 @@ while True:
 
     if(climWeight != 0):
         print()
-        print("CLIMATE")
+        print("CLIMATE OF THE METRO")
 
         # temperature
         print()
         print()
-        print("How important is the temperature of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the temperature of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -655,8 +674,9 @@ while True:
         #sunlight
         print()
         print()
-        print("How important are the sunlight levels of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the sunlight levels of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -673,8 +693,9 @@ while True:
         #precipitation
         print()
         print()
-        print("How important is the rain/ precipitation levels of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the rain/ precipitation levels of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -691,8 +712,9 @@ while True:
         #snow
         print()
         print()
-        print("How important is the snow levels of the metro? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important are the snow levels of the metro?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -709,8 +731,9 @@ while True:
         # overall disaster
         print()
         print()
-        print("How important is the level of natural disasters in metros? 0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("How important is the level of natural disasters in metros?")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print()
 
         if(weight != 0):
@@ -728,8 +751,8 @@ while True:
         print()
         print()
         print("How important is the potential of specific natural disasters?")
-        print("0 = not important, 10 = very important. ")
-        weight = intCheck()
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
         print() 
 
         if (weight != 0):
@@ -774,7 +797,7 @@ while True:
 
     if(cultWeight != 0):
         print()
-        print("CULTURAL")
+        print("CULTURAL ASPECTS OF THE METRO")
 
     #sports
         print()
@@ -822,7 +845,7 @@ while True:
     print()
     print()
     print()
-    print("RESULTS")
+    print("FINAL RESULTS")
     print()
 
     # results: declare the best metros for the user

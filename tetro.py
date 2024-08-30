@@ -2,9 +2,13 @@
 # Metro-advisor
 # 8/29/2023
 
+
 import pandas as pd
+import plotly.graph_objs as go
+import plotly.offline as py
 import math as m
 from collections import Counter
+
 
 
 # FUNCTIONS
@@ -106,8 +110,11 @@ def intCheck():
 
 print()
 print()
-print('Welcome to Tetro!')
+print()
+print('*** WELCOME TO TETRO! ***')
+name = input("What is your name? ")
 print("Enter x at anytime to quit.")
+print()
 print()
 
 weight = int()
@@ -119,7 +126,7 @@ totalWeight = 0
 
 
 
-# report: create new report, where everything will be saved
+# report: creates a new report, where everything will be saved
 
 data1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="metroData", index_col='metro')
 report1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_name="report", index_col='metro')
@@ -127,6 +134,7 @@ report1 = pd.read_excel(io="C:\\Users\\turan\\Documents\\metroData.xlsx", sheet_
 data = data1.to_dict()
 report = report1.to_dict()
 results = report["results"]
+regions = report["region"]
 curResults = report["curResults"]
 demoResults = report["base1"]
 climResults = report["base2"]
@@ -135,22 +143,26 @@ homeResults = report["base4"]
 cultResults = report["base5"]
 
 
-# questions: where questions will be asked and functions called
+# questions: where questions will be asked and functions will be called
 
 while True:
 
-    print("Please determine, on a scale of 0 to 10,how important these aspects of metros are:")
-    print("Demographics, economy, home and transport, climate, and culture")
+    print("Please determine, on a scale of 0 to 10, how important these aspects of a city are to you:")
+    print("DEMOGRAPHICS,    ECONOMY,    HOME AND TRANSPORTATION,    CLIMATE,    CULTURE")
     print("0 = not important, 10 = very important")
     print()
-    print("Demographics of the metro (age, racial, religiosity, education, politics):")
+    print("Demographics of the metro (age, racial makeup, religiosity, education, politics):")
     demoWeight = intCheckTen()
-    print("Economy and worklife of the metro (income, prices, worklife):")
+    print()
+    print("Economy and worklife of the metro (income, price of goods, worklife):")
     econWeight = intCheckTen()
-    print("Home and transportation of the metro (home costs, home and transportation types): ")
+    print()
+    print("Homes and transportation in the metro (home costs, quality and availablity of home and transportation types): ")
     homeWeight = intCheckTen()
-    print("Climate of the metro (weather, sunshine, natural disasters): ")
+    print()
+    print("Climate of the metro (weather, amount of sunshine, natural disasters): ")
     climWeight = intCheckTen()
+    print()
     print("Culture of the metro(sports): ")
     cultWeight = intCheckTen()
 
@@ -160,27 +172,30 @@ while True:
 
     if(demoWeight != 0):
         print()
-        print("DEMOGRAPHICS OF THE METRO")
+        print()
+        print()
+        print()
+        print("** DEMOGRAPHICS OF THE METRO **")
 
         #ideal size of metro
         print()
         print()
-        print("How important is the size of the metro (population)?")
-        print("0 = not important, 10 = very important.")
+        print("How important is the size of the metro?")
+        print("(Do you prefer or need to live in a metro with a small or large population?)")
         weight = intCheckTen()
         print()
 
         if(weight != 0):
             
-            print("What is your ideal size of a metro? (Largest is 20M, smallest 475K)")        
+            print("How many people should your ideal metro have? (largest: 20M, smallest: 475K)")        
             print("Please enter your ideal population size.")
             size0 = m.log10(intCheck())
-            print("Please enter the highest acceptable range. If no upper limit, enter 1.")
+            print("Please enter the highest acceptable population. If there is no upper limit, enter 0.")
             size1 = intCheck()
-            if size1 == 1:
+            if size1 == 0:
                 size1 = 21000000
             size1 = m.log10(size1) 
-            print("Please enter the lowest acceptable range. If no lower limit, enter 0.")
+            print("Please enter the lowest acceptable population. If there is no lower limit, enter 0.")
             size2 = intCheck()
             if size2 == 0:
                 size2 = 475000
@@ -192,14 +207,15 @@ while True:
         #population growth rate
         print()
         print()
-        print("How important is the growth rate of the metro?")
+        print("How important is the population growth rate of the metro?")
+        print("(Do you have a prefer for fast growing or slow growing cities?)")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print()
 
         if (weight != 0):
             print("Enter your ideal metro growth rate (2010 to 2020 growth in parathesis)")
-            print("(-1% to 1%) Cities that don't change.")
+            print("(-1% to 1%) Stabilized growth.")
             print("(1% to 5%) Slow growth")
             print("(5% to 10%) Moderate growth")
             print("(10% to 15%) Fast growth")
@@ -221,12 +237,12 @@ while True:
 
         if (weight != 0):
             print("How diverse is your ideal metro?")
-            print("66-75 = no group has clear majority (80-100)")
+            print("66-75 = no group has a clear majority (80-100)")
             print("55-66 = one group (likely) has a slim majority (66-80)")
             print("40-55 = the vast majority is one group (50-66)")
             print("10-40 = little to no diversity (0-50)")
 
-            print("Your preference: ")
+            print("Your preference (Enter a number between 10 and 75): ")
             diverse = intCheck()/100   #adjust down to the scale of data if choose 0-100 scale: *.007445
             demoResults = addToReport(growth(data["diversityPerc"], curResults, diverse, .2), demoResults, weight)
             totalWeight += weight
@@ -236,6 +252,7 @@ while True:
         print()
         print()
         print("How important are the racial demographics of the metro?")
+        print("(EX: do you want to live in a city with many people from a certain group?)")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print()
@@ -251,8 +268,9 @@ while True:
                 race = {1:"whiteAlone", 2:"latino", 3:"blackAlone", 4:"asianAlone", 
                         5:"nativeAlone", 6:"pacificAlone", 7:"otherAlone", 8:"twoPlus"}
                 
+                print()
                 print("What percentage of the metro should this group be?")
-                print("100 = as many as possible, 0 = as little as possible")
+                print("0 = as little as possible, 100 = as many as possible")
                 priority2 = intCheck()
 
                 if(round1 == 1):
@@ -260,7 +278,7 @@ while True:
                 else:
                     curResults = Counter(curResults) + Counter(minMax(data[race[priority1]], curResults, priority2))
                 
-                cont = int(input("Do you want to adjust any other groups? 1 = yes, 0 = no. "))
+                cont = int(input("Would you like to adjust any other groups? Yes = 1, No = 0. "))
                 if(cont == 0):
                     break
             
@@ -275,17 +293,21 @@ while True:
         print()
         print()
         print("How important are the age demographics of the metro?")
+        print("(Do you want to live in a metro that leans younger, older, or middle-aged?)")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print()
 
         if (weight != 0):
-            print("Would you like to adjust by the median age of the metro OR adjust specific age groups?")
-            print("1 = adjust by median age, 2 = adjust specific age groups?")
+            print("Would you like to adjust by the median age of the metro (the average of the metro's residents)")
+            print("OR")
+            print("would you like to adjust specific age brackets? (EX: adjust to have more 18-24 residents, less 0-18, etc.)")
+            print("1 = adjust by median age, 2 = adjust specific age brackets?")
             aging = intCheck()
+            print()
 
             if(aging == 1):
-                print("How young or old should it be overall?")
+                print("How young or old should the metro be overall?")
                 print("0 = as young as possible, 100 = as old as possible")
 
                 print("Your preference: ")
@@ -297,13 +319,13 @@ while True:
                 round = 1
 
                 while True:
-                    print("Is there a specific age brackets you would like to prioritize/ deprioritize?")
+                    print("Is there a specific age bracket you would like to prioritize/ deprioritize?")
                     print("Ages 0-18 = 1, Ages 18-24 = 2, Ages 25-44 = 3, Ages 45-64 = 4, Ages 65 and up = 5")
                     priority1 = intCheck()
                     age = {1:"0to18", 2:"18to24", 3:"25to44", 4:"45to64", 5:"65plus"}
                     
-                    print("How much of this group should be in this metro?")
-                    print("100 = as many as possible, 0 = as little as possible")
+                    print("How much of this age bracket should be in this metro?")
+                    print("0 = as little as possible, 100 = as many as possible")
                     priority2 = intCheck()
 
                     if(round == 1):
@@ -312,59 +334,7 @@ while True:
                     else:
                         curResults = Counter(curResults) + Counter(minMax(data[age[priority1]], curResults, priority2))
                     
-                    cont = int(input("Do you want to adjust any other age brackets? 1 = yes, 0 = no. "))
-                    if(cont == 0):
-                        break
-
-                # divides curResults by the number of rounds
-                curResults = Counter({key : curResults[key] / round for key in curResults})
-                demoResults = addToReport(curResults, demoResults, weight)
-                totalWeight += weight
-
-
-        # education level
-        print()
-        print()
-        print("How important is the overall education level of the metro?")
-        print("0 = not important, 10 = very important.")
-        weight = intCheckTen()
-        print()
-
-        if (weight != 0):
-            print("Would you like to adjust the overall education level of the metro OR specific levels of education?")
-            print("1 = overall education level, 2 = specific levels of education")
-            educate = intCheck()
-
-            if(educate == 1):
-                print("How important is education levels of the metro?")
-                print("0 = education isn't important, 100 = education is important")
-
-                print("Your preference: ")
-                diverse = (intCheck()/112.3595506)+2.29   #adjusts 0-100 into 2.29-3.18
-                demoResults = addToReport(growth(data["educationLevel"], curResults, diverse, .35), demoResults, weight)
-                totalWeight += weight
-
-
-            if (educate == 2):
-                round = 1
-
-                while True:
-                    print("Which education level would you like to prioritize/ deprioritize?")
-                    print("Less than high school = 1, High school = 2, Some college = 3, Bachelors and up = 4")
-                    priority1 = intCheck()
-                    age = {1:"lessHighSchoolPerc", 2:"highSchoolPerc", 3:"someCollegePerc", 4:"bachelorPlusPerc"}
-                    
-                    print("How much of this group should be in this metro?")
-                    print("100 = as many as possible, 0 = as little as possible")
-                    priority2 = intCheck()
-
-                    if(round == 1):
-                        curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
-                        round += 1
-                    else:
-                        curResults = Counter(curResults) + Counter(minMax(data[age[priority1]], curResults, priority2))
-                    
-                    cont = int(input("Do you want to adjust any other age brackets? 1 = yes, 0 = no. "))
+                    cont = int(input("Would you like to adjust any other age brackets? Yes = 1, No = 1. "))
                     if(cont == 0):
                         break
 
@@ -411,7 +381,7 @@ while True:
             print("(15% to 30%) Very conservative")
             print("(30% to 45%) As conservative as possible")
 
-            print("Your preference: ")
+            print("Your preference (-60 to 45): ")
             politics = intCheck()/100
             demoResults = addToReport(growth(data["margin"], curResults, politics, .3), demoResults, weight)
             totalWeight += weight
@@ -423,19 +393,22 @@ while True:
 
     if(econWeight != 0):
         print()
-        print("ECONOMY AND WORKLIFE OF THE METRO")
+        print()
+        print()
+        print()
+        print("** ECONOMY AND WORKLIFE OF THE METRO **")
 
         # travel time
         print()
         print()
-        print("How important is the average travel time to work in the metro (relates to traffic levels)?")
+        print("How important is the average travel time to work?")
+        print("(This also relates to traffic levels of the metro.)")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print()
 
         if (weight != 0):
             print("How important are short travel times to work for you? 0 = not important, 100 = very important")
-            print("Your preference: ")
             travel = (abs(100-intCheck())/1.39082)+20.2   #adjusts 0-100 into 20.2-92.1
             econResults = addToReport(growth(data["travelTimeMins"], curResults, travel, 25), econResults, weight)
             totalWeight += weight
@@ -464,8 +437,8 @@ while True:
         print()
 
         if (weight != 0):
-            print("Do you prefer to live in a poorer or richer area?")
-            print("0 = as poor as possible, 100 = as rich as possible")
+            print("Do you prefer to live in lower or higher income area?")
+            print("0 = as low income as possible, 100 = as high income as possible")
 
             print("Your preference: ")
 
@@ -484,7 +457,7 @@ while True:
 
         if (weight != 0):
             print("Does it matter if the metro is expensive?")
-            print("0 = yes- I prefer cheaper metros, 100 = no- I'm happy with expensive metros")
+            print("0 = Yes- I prefer cheaper metros, 100 = No- I'm okay with expensive metros")
 
             print("Your preference: ")
 
@@ -496,15 +469,76 @@ while True:
         totalWeight = 0
 
 
+        # education level
+        print()
+        print()
+        print("How important is the overall education level of the metro?")
+        print("(This can effect the types of jobs available, such as the availablity blue or white collar jobs.)")
+        print("0 = not important, 10 = very important.")
+        weight = intCheckTen()
+        print()
+
+        if (weight != 0):
+            print("Would you like to adjust the overall education level of the metro (the median residents education level)")
+            print("OR")
+            print("would you like to adjust specific levels of education? (EX: adjust to have more high school degrees, less graduate degrees, etc.)")
+            print("1 = overall education level, 2 = specific levels of education")
+            educate = intCheck()
+            print()
+
+            if(educate == 1):
+                print("Do you prefer metros with less or more education?")
+                print("Do you prefer metros with less or more education?")
+                print("0 = education isn't important, 100 = education is important")
+
+                print("Your preference: ")
+                diverse = (intCheck()/112.3595506)+2.29   #adjusts 0-100 into 2.29-3.18
+                econResults = addToReport(growth(data["educationLevel"], curResults, diverse, .35), econResults, weight)
+                totalWeight += weight
+
+
+            if (educate == 2):
+                round = 1
+
+                while True:
+                    print("Which education level would you like to prioritize/ deprioritize?")
+                    print("Less than high school = 1, High school = 2, Some college = 3, Bachelors and up = 4")
+                    priority1 = intCheck()
+                    age = {1:"lessHighSchoolPerc", 2:"highSchoolPerc", 3:"someCollegePerc", 4:"bachelorPlusPerc"}
+                    
+                    print("How much of this group should be in this metro?")
+                    print("100 = as many as possible, 0 = as little as possible")
+                    priority2 = intCheck()
+
+                    if(round == 1):
+                        curResults = Counter(minMax(data[age[priority1]], curResults, priority2))
+                        round += 1
+                    else:
+                        curResults = Counter(curResults) + Counter(minMax(data[age[priority1]], curResults, priority2))
+                    
+                    cont = int(input("Do you want to adjust any other age brackets? 1 = yes, 0 = no. "))
+                    if(cont == 0):
+                        break
+
+                # divides curResults by the number of rounds
+                curResults = Counter({key : curResults[key] / round for key in curResults})
+                econResults = addToReport(curResults, econResults, weight)
+                totalWeight += weight
+
+
 
     if(homeWeight != 0):
         print()
-        print("HOME AND TRANSPORTATION IN THE METRO")
+        print()
+        print()
+        print()
+        print("** HOME AND TRANSPORTATION IN THE METRO **")
 
         # types of transport
         print()
         print()
         print("How important is the availability of specific transportation methods in the metro?")
+        print("(Do you need to live in a city with good public transport, biking support, walkability, etc.)")
         print("0 = not important, 10 = very important. ")
         weight = intCheckTen()
         print() 
@@ -519,7 +553,7 @@ while True:
                 transport = {1:"vehicle", 2:"publicTransport", 3:"walking", 4:"biking", 5:"greenTransport"}
                 
                 print("How much should you priorize this method of transportation in metros?")
-                print("100 = as many as possible, 0 = as little as possible")
+                print("0 = as little as possible, 100 = as many as possible")
                 priority2 = intCheck()
 
                 if(round == 1):
@@ -528,7 +562,7 @@ while True:
                     curResults = Counter(curResults) + Counter(minMax(data[transport[priority1]], curResults, priority2))
                 round += 1
 
-                cont = int(input("Do you want to adjust any other transportation methods? 1 = yes, 0 = no. "))
+                cont = int(input("Do you want to adjust any other transportation methods? Yes = 1, No = 0. "))
                 if(cont == 0):
                     break
 
@@ -540,7 +574,7 @@ while True:
         #housing costs
         print()
         print()
-        print("How important is the cost of housing in a metro (measured in single family housing)?")
+        print("How important is the cost of housing in a metro?")
         print("0 = not important, 10 = very important.")
 
         weight = intCheckTen()
@@ -548,14 +582,15 @@ while True:
 
         if(weight != 0):
             
-            print("What is your ideal average cost of a metro?")
-            print("Largest is 1577K, smallest 135K. Measured in single family housing.)")        
-            print("Please enter your ideal average cost.")
+            print("What is your ideal average cost to buy a single-family home?")
+            print("Largest is 1577K, smallest is 135K.")        
             size0 = m.log10(intCheck()/1000)
-            print("Please enter the highest acceptable range. If no upper limit, enter 1.")
+            print()
+            print("Please enter the highest acceptable range. If no upper limit, enter 0.")
             size1 = intCheck()/1000
-            if size1 == 1:
+            if size1 == 0:
                 size1 = 1576
+            print()
             print("Please enter the lowest acceptable range. If no lower limit, enter 0.")
             size2 = intCheck()/1000
             if size2 == 0:
@@ -569,7 +604,7 @@ while True:
         print()
         print()
         print("How important is the availability of different types of housing options?")
-        print("(Example: availability of single family housing, duplex, apartments, etc.)")
+        print("(EX: availability of single family housing, duplexes, multi-family housing, apartments, etc.)")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print() 
@@ -579,13 +614,16 @@ while True:
 
             while True:
                 print("What type of housing would you like to prioritize/ deprioritize?")
-                print("Single family detached = 1, Single family attached = 2, Duplex = 3")
-                print("3 to 4 units = 4, 5 to 9 units = 5, 10 or more units = 6, Mobile housing and others = 7")
+                print("Single family detached = 1,   Single family attached (townhouses)= 2")
+                print("Duplexes = 3,   3 to 4 unit apartments = 4,   5 to 9 unit apartments = 5")
+                print("10 or more unit apartments = 6,   Mobile housing and others = 7")
 
                 priority1 = intCheck()
                 houses = {1:"SFDetachedPerc", 2:"SFAttachedPerc", 3:"2apartments", 4:"3to4apartments", 5:"5to9apartments",
                             6:"10plusApartments", 7: "mobileAndOtherHomes"}
                 
+                
+                print() 
                 print("How much should you priorize/ deprioritize this housing option in metros?")
                 print("0 = as little as possible, 100 = as much as possible")
                 priority2 = intCheck()
@@ -596,7 +634,8 @@ while True:
                 else:
                     curResults = Counter(curResults) + Counter(minMax(data[houses[priority1]], curResults, priority2))
                 
-                cont = int(input("Do you want to adjust any other housing options? 1 = yes, 0 = no. "))
+                print() 
+                cont = int(input("Do you want to adjust any other housing options? 1 = Yes, 0 = No. "))
                 if(cont == 0):
                     break
 
@@ -615,7 +654,7 @@ while True:
         print()
 
         if(weight != 0):
-            print("What is your ideal age of housing in a metro?")
+            print("What is your ideal age of housing in metros?")
             print("0 = as young as possible, 100 = as old as possible")
 
             print("Your preference: ")
@@ -628,7 +667,8 @@ while True:
         #owner occupied
         print()
         print()
-        print("How important is the amount of owner occupied units in the metro (also reflects how many rentals are available)?")
+        print("How important is the amount of owner occupied units in the metro?")
+        print("This also effects how many rental units are available.")
         print("0 = not important, 10 = very important.")
         weight = intCheckTen()
         print()
@@ -680,7 +720,7 @@ while True:
         print()
 
         if(weight != 0):
-            print("Do you prefer little sun or sunnier metros?")
+            print("Do you prefer less sun or sunnier metros?")
             print("0 = as little sunny as possible, 100 = as much sun as possible")
 
             print("Your preference: ")
@@ -699,7 +739,7 @@ while True:
         print()
 
         if(weight != 0):
-            print("Do you prefer little rain or rainier metros?")
+            print("Do you prefer less rainy or rainier metros?")
             print("0 = as little rain as possible, 100 = as much rain as possible")
 
             print("Your preference: ")
@@ -718,7 +758,7 @@ while True:
         print()
 
         if(weight != 0):
-            print("Do you prefer little snow or snowier metros?")
+            print("Do you prefer less snowy or snowier metros?")
             print("0 = as little snow as possible, 100 = as much snow as possible")
 
             print("Your preference: ")
@@ -781,7 +821,7 @@ while True:
                 else:
                     curResults = Counter(curResults) + Counter(minMax(data[nature[priority1]], curResults, priority2))
                 
-                cont = int(input("Do you want to adjust any other transportation methods? 1 = yes, 0 = no. "))
+                cont = int(input("Do you want to adjust any other natural disasters? 1 = Yes, 0 = No. "))
                 if(cont == 0):
                     break
 
@@ -845,6 +885,7 @@ while True:
     print()
     print()
     print()
+    print()
     print("FINAL RESULTS")
     print()
 
@@ -852,7 +893,26 @@ while True:
     results = Counter(demoResults) + Counter(econResults) + Counter(homeResults) + Counter(climResults) + Counter(cultResults)
     results = Counter({key : results[key] /sectionWeight for key in results})
     print()
-    print(results)
-    print(totalWeight)
+
+
+    df = pd.DataFrame.from_dict(results, orient='index', columns=['values'])
+    df['region'] = df.index.map(regions)
+    df1 = df.sort_values(by='values', ascending=False).head(25)
+
+    data = [go.Bar(x=df1.index, y=df1['values'].round(2), 
+                   marker_color=df1['region'].apply(lambda x: {'Northeast': 'deepskyblue', 'South': 'orangered', 
+                                                               'West': 'gold', 'Midwest': 'limegreen'}.get(x, 'gray')),
+            )]
+
+    layout = go.Layout(
+    title= {'text':'Tetro Results: The Best Metro Areas for ' + name, 'y': 0.95, 'x': 0.5, 'font':dict(size=30)},
+    xaxis=dict(title='US Metropolitan Areas'),
+    yaxis=dict(title='Scores'))
+
+    fig = go.Figure(data=data, layout=layout)
+    py.iplot(fig)
+
+
+
     break
 
